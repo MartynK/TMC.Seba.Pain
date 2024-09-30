@@ -188,22 +188,20 @@ eval_sim_results <- function(dat_results_sim) {
   return(nrow(sig_contrasts) == 3)
 }
 
-dat_results_sim <-  fun_simulate_study(n_samp = 6)  %>% eval_sim_results()
 
-NSIM <- 10
+NSIM <- 30
 dat_sim_par <- expand.grid(
   n_samp = c(6, 12, 18, 24),
   total_variance = c(1.2, 1.7, 2.2),
   ICC = c(0.2, 0.4, 0.6, 0.8),
-  trtA = 3,
-  trtB = 2,
+  trtA = 5,
+  trtAB = 1.5,
+  trtBC = 1,  # watch this, resulting mean score should not be negative
   missing_prop2 = 0.05,
   missing_prop3 = 0.1,
   NSIM = NSIM
 )
 
-dat_sim_par <- dat_sim_par %>%
-  mutate(trtC = min(0, 1)) # To be implemented, '1' is tunable
 
 dat_sim_par$res <- NA
 pb <- utils::txtProgressBar(min = 0, max = nrow(dat_sim_par), style = 3)
@@ -215,8 +213,8 @@ for ( i in 1:nrow(dat_sim_par)) {
        total_variance = dat_sim_par$total_variance[i],
        ICC = dat_sim_par$ICC[i],
        treat_eff_c = c(dat_sim_par$trtA[i],
-                       dat_sim_par$trtB[i],
-                       dat_sim_par$trtC[i]),
+                       dat_sim_par$trtA[i] - dat_sim_par$trtAB[i],
+                       dat_sim_par$trtB[i] - dat_sim_par$trtBC[i]),
        missing_prop = c(dat_sim_par$missing_prop2[i],
                         dat_sim_par$missing_prop3[i])
      )  %>%
