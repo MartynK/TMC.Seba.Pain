@@ -41,7 +41,7 @@ Parallel_envir_setup <- function(spare_korez = 4, action = "setup", verbose = FA
 
   # Load required packages into the main environment if clean is FALSE
   if (!clean) {
-    packages <- c("parallel", "doParallel", "foreach", "tcltlk")
+    packages <- c("parallel", "doParallel", "foreach", "tcltk")
     for (pkg in packages) {
       if (!requireNamespace(pkg, quietly = TRUE)) {
         stop(paste("Required package", pkg, "is not installed. Please install it."))
