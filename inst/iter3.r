@@ -2,8 +2,6 @@
 source( here::here( "inst", "functions", "load_stuff.r"))
 
 generate_variable_matrix <- function(n) {
-  # Set random seed for reproducibility (optional)
-  set.seed(123)
 
   # Generate random values for each parameter
   n_samp <- sample(c(6, 12, 18, 24, 30), n, replace = TRUE)
