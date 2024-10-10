@@ -5,6 +5,8 @@ library(dplyr)
 library(nlme)
 library(emmeans)
 
+set.seed(42)
+
 n_samp <- 18
 block_size <- 6
 
@@ -141,7 +143,6 @@ res_contrast_none <- contrast(emm_ojj,
                               adjust = "none",
                               lmer.df = "Kenward-Roger" # this is default btw
                               )
-
 
 (res_contrast_none)
 

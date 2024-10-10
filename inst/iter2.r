@@ -144,7 +144,7 @@ fun_simulate_study <- function(
 
   try({
     # Fitting with lmer, with the lmerTest which provides the Kenward-Roger df
-    mod <- lmerTest::lmer(y ~ period + trt + (1|id),
+    mod <- lmerTest::lmer(y ~ period + trt + (1|id/assign),
                           data = dat_subs_long)
   })
 

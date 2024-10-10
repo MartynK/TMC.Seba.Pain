@@ -8,8 +8,6 @@ load(here::here("data","sim_results.rda"))
 dat_glm <- dat_out %>%
   filter(NSIM == 100)
 
-
-
 # plot dat_glm
 ggplot(dat_glm, aes(x = total_variance, y = res, color = ICC)) +
   geom_point(alpha=.15) +
@@ -22,7 +20,7 @@ ggplot(dat_glm, aes(x = total_variance, y = res, color = ICC)) +
   theme_minimal()
 
 mod <- glm( cbind(res, NSIM-res) ~
-              (
+             (
               ns( n_samp, df = 2)
             + ns( total_variance, df = 2)
             + ns( ICC, df = 2)
