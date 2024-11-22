@@ -63,21 +63,37 @@
 #' @importFrom dplyr left_join mutate
 #' @importFrom magrittr %>%
 #' @export
-fun_simulate_study <- function(
+fun_simulate_study_crossover <- function(
     n_samp = 18,            # Number of total subjects
     block_size_coef = 1,    # Coefficient to determine block size
     total_variance = 2,     # Desired total variance
-    treat_eff_c = c(3,2,1) # Treatment effects
+    ICC = 0.75,             # Desired ICC
+    treat_eff_c = c(3,2,1), # Treatment effects
+    missing_prop = c(.05,.1) # Cumulative missing data proportion in periods 2 & 3
 ) {
 
   treat_eff <- data.frame(trt = c("A", "B", "C"),
                           eff = treat_eff_c)
 
-  block_size <- round(3 * block_size_coef)
+  block_size <- round(6 * block_size_coef)
 
+  # Variance of random effects (random intercepts)
+  var_random <- ICC * total_variance
+
+  # Residual variance
+  var_residual <- total_variance - var_random
 
   ##################
   # Data preparation
+
+  # Create a list of the sequences using a Williams design
+  # Reference: https://onbiostatistics.blogspot.com/2018/10/latin-squares-for-constructing-williams.html
+  seq_list <- data.frame(
+    id = 1:6,
+    P1 = factor(c("A", "B", "C", "C", "A", "B")),
+    P2 = factor(c("B", "C", "A", "B", "C", "A")),
+    P3 = factor(c("C", "A", "B", "A", "B", "C"))
+  )
 
   # Create a dataframe for the subjects
   dat_subs <- data.frame(
@@ -86,7 +102,7 @@ fun_simulate_study <- function(
   )
 
   # Assign sequences to subjects using block randomization
-  dat_subs$assign <- fun_block_randomize(n_samp, block_size, arms = 3)
+  dat_subs$assign <- fun_block_randomize(n_samp, block_size, arms = 6)
 
   # Merge the subject data with the sequence list
   dat_subs <- merge(dat_subs, seq_list, by.x = "assign", by.y = "id")

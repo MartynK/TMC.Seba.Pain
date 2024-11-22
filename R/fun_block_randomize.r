@@ -55,7 +55,7 @@ fun_block_randomize <- function(n, block_size, arms = 6) {
     act_block <-
       {block_size - n_comp * arms} %>%  # Number of subs for incompl.rep.
       sample(1:arms,.) %>%              # Randomly select incomp.rep.
-      c( rep(1:6,n_comp),.) %>%         # Add complete reps.
+      c( rep(1:arms,n_comp),.) %>%         # Add complete reps.
       sample(.)                         # Shuffle the order
 
     assign_vec[((i - 1) * block_size + 1) : (i * block_size)] <- act_block
