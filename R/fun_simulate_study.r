@@ -59,10 +59,10 @@ fun_simulate_study <- function(
     n_samp = 18,            # Number of total subjects
     block_size_coef = 1,    # Coefficient to determine block size
     var_study = 2,     # Desired total variance
-    treat_eff_c = c(3,2,1) # Treatment effects
+    treat_eff_c = c(3,1,0) # Treatment effects;A=no distr.,B=Ipad, C=VirtReal
 ) {
 
-  treat_eff <- data.frame(trt = c(1,2,3),
+  treat_eff <- data.frame(trt = 1:length(treat_eff_c),
                           eff = treat_eff_c)
 
   block_size <- round(3 * block_size_coef)
