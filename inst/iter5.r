@@ -4,26 +4,20 @@ source( here::here( "inst", "functions", "load_stuff.r"))
 generate_variable_matrix <- function(n) {
 
   # Generate random values for each parameter
-  n_samp <- sample(c(6, 12, 18, 24, 30), n, replace = TRUE)
+  n_samp <- runif(n, min = 10, max = 200)  %>% {./10} %>% round(digits = 0) %>% {.*10}
   total_variance <- runif(n, min = 1, max = 3)  %>% round(digits = 2)
-  ICC <- runif(n, 0.1, 0.9) %>% round(digits = 2)
-  trtA <- rep(5, n)  # Treatment A effect fixed at 5
+  trtA <- rep(3, n)  # Treatment A effect fixed at 5
   trtAB <- runif(n, min = 0.5, max = 3)  %>% round(digits = 2)
   trtBC <- runif(n, min = 0, max = trtAB)  %>% round(digits = 2)
-  missing_prop2 <- runif(n, min = 0.0, max = 0.3)  %>% round(digits = 2)
-  missing_prop3 <- runif(n, min = missing_prop2, max = 0.3)  %>% round(digits = 2)
   NSIM <- 10
 
   # Create the dataframe
   df <- data.frame(
     n_samp = n_samp,
     total_variance = total_variance,
-    ICC = ICC,
     trtA = trtA,
     trtAB = trtAB,
     trtBC = trtBC,
-    missing_prop2 = missing_prop2,
-    missing_prop3 = missing_prop3,
     NSIM = NSIM,
     res = NA
   )
@@ -40,13 +34,10 @@ fun_process_data <- function(dat_sim_par) {
     for (j in 1:dat_sim_par$NSIM[i]) {
       dat_results_sim <- fun_simulate_study(
         n_samp = dat_sim_par$n_samp[i],
-        total_variance = dat_sim_par$total_variance[i],
-        ICC = dat_sim_par$ICC[i],
+        var_study = dat_sim_par$total_variance[i],
         treat_eff_c = c(dat_sim_par$trtA[i],
                         dat_sim_par$trtA[i] - dat_sim_par$trtAB[i],
-                        dat_sim_par$trtB[i] - dat_sim_par$trtBC[i]),
-        missing_prop = c(dat_sim_par$missing_prop2[i],
-                         dat_sim_par$missing_prop3[i])
+                        dat_sim_par$trtB[i] - dat_sim_par$trtBC[i])
       )  %>%
         eval_sim_results()
 
