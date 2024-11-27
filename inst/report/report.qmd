@@ -1,6 +1,7 @@
 ---
-title: "[TITLE]"
+title: "Sample Size considerations for Seba Aljomaa's RCT Project"
 author: "Márton Kiss, MD"
+date: "`r Sys.Date()`"
 format:
   docx:
     fig-width: 6
@@ -18,10 +19,12 @@ execute:
 
 ```{r setup}
 
-fil <- here::here("inst","extdata","Iris.xls")
 
-source( here::here( "inst", "report", "functions", "load_stuff.r"))
-source( here::here( "inst", "report", "functions", "wrangling.r"))
+source( here::here( "inst", "functions", "load_stuff.r"))
+source(here::here("inst","iter7_train_of_thought.R"))
+source(here::here("inst","iter8_train_of_thought_pt2.R"))
+
+
 
 # source_all_files(here::here("inst","example_quarto","backend")) # Run slow stuff; 
 ##recommend running separately
@@ -45,7 +48,7 @@ load_all_Rdata(directory=here::here("inst","report","backend")) # Load slow suff
 ### MD5 checksum of the database used
 
 ```{r, comment='', results='asis'}
-tools::md5sum(fil) # %>% as.character # Uncomment reporting path is not desirable
+#tools::md5sum(fil) # %>% as.character # Uncomment reporting path is not desirable
 ```
 
 ### Other information regarding the document's compilation

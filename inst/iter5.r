@@ -4,12 +4,13 @@ source( here::here( "inst", "functions", "load_stuff.r"))
 generate_variable_matrix <- function(n) {
 
   # Generate random values for each parameter
-  n_samp <- runif(n, min = 10, max = 200)  %>% {./10} %>% round(digits = 0) %>% {.*10}
-  total_variance <- runif(n, min = 1, max = 3)  %>% round(digits = 2)
+  n_samp <- runif(n, min = 110, max = 180)  %>%
+    {./10} %>% round(digits = 0) %>% {.*10}
+  total_variance <- runif(n, min = 2.4, max = 2.6)  %>% round(digits = 2)
   trtA <- rep(3, n)  # Treatment A effect fixed at 5
-  trtAB <- runif(n, min = 0.5, max = 3)  %>% round(digits = 2)
-  trtBC <- runif(n, min = 0, max = trtAB)  %>% round(digits = 2)
-  NSIM <- 10
+  trtAB <- runif(n, min = 1.8, max = 2.2)  %>% round(digits = 2)
+  #trtBC <- runif(n, min = 0, max = trtAB)  %>% round(digits = 2)
+  NSIM <- 30
 
   # Create the dataframe
   df <- data.frame(
@@ -17,10 +18,13 @@ generate_variable_matrix <- function(n) {
     total_variance = total_variance,
     trtA = trtA,
     trtAB = trtAB,
-    trtBC = trtBC,
-    NSIM = NSIM,
-    res = NA
-  )
+    #trtBC = trtBC,
+    NSIM = NSIM
+  ) %>% mutate(trtBC = runif(n(),
+                             min = 0, #- trtAB,
+                             max = trtA - trtAB) %>%
+                         round(digits = 2),
+               res = NA)
 
   return(df)
 }
@@ -37,7 +41,8 @@ fun_process_data <- function(dat_sim_par) {
         var_study = dat_sim_par$total_variance[i],
         treat_eff_c = c(dat_sim_par$trtA[i],
                         dat_sim_par$trtA[i] - dat_sim_par$trtAB[i],
-                        dat_sim_par$trtB[i] - dat_sim_par$trtBC[i])
+                        dat_sim_par$trtA[i] - dat_sim_par$trtAB[i]
+                                               - dat_sim_par$trtBC[i])
       )  %>%
         eval_sim_results()
 

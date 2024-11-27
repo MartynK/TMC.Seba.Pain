@@ -4,88 +4,158 @@ format: docx
 editor: visual
 ---
 
-# Examples for quick reference
+# Executive summary
 
-## Tables
+Based on the variables discussed for the calculations, taking into consideration the possible effect of rounding, and after conducting a simulation study an appropriate sample size for the study would be between 114 and 171 subjects (total).
 
-Tables may be in a huxtable object for "seamless" word processing. The resulting table is ugly.
 
- \
 
 ```{r}
 
 # generating the table which is comp.expensive for some reason
-tab <- data %>%
-  dplyr::select(!(species_no)) %>%
-  gtsummary::tbl_summary(
-    by = species_char
+tab <- dat_accept_sampsize%>%
+    huxtable::as_hux() %>%
+    huxtable::theme_compact() 
+
+huxtable::font_size(tab) <- 6
+
+(tab)
+
+```
+
+# Introduction
+
+This randomized controlled trial investigates the efficacy of three interventions—standard lidocaine-prilocaine cream, tablets, and virtual reality (VR) glasses—for reducing pain and anxiety during needle pricking in pediatric oncology patients. The trial design includes three parallel arms, each comparing pain and anxiety levels using validated scales to determine the most effective method for distraction. 
+
+The primary outcome is the difference in pain and anxiety scores between the three interventions across all comparisons. 
+
+\newpage
+
+# Assumptions for sample size considerations
+
+The sample size estimation supposes two sided tests at a global $\alpha$ = 5% significance level (equivalent to one-sided testing with an $\alpha$ = 2.5% significance level). This is in line with the recommendations described in ICH E9 Section 3.5.
+
+*"The issue of one-sided or two-sided approaches to inference is controversial and a diversity of views can be found in the statistical literature. The approach of setting type I errors for one-sided tests at half the conventional type I error used in two-sided tests is preferable in regulatory settings. This promotes consistency with the two-sided confidence intervals that are generally appropriate for estimating the possible size of the difference between two treatments."*
+
+The general assumptions for the sample size considerations (where not otherwise indicated) are:
+
+-   Superiority testing (using two-sided tests)
+
+-   Global two-sided level of significance: **5%**
+
+-   Power: **80% - 90%**
+
+-   Dropout rate: **0%** (not applicable here since the intervention only applied once and takes \~5 minutes)
+
+-   Variability of the pain scores: **2.5** points (on a 0-10 point continuous scale)
+
+-   Expected value during intervention A (no distraction): **3** points
+
+-   Expected value during intervention B (iPAD distraction): 1 point
+
+-   Expected value during intervention C (VR distraction): 0 points
+
+-   Primary outcome: All comparisons between interventions A, B and C must be statistically significant
+
+\newpage
+
+# Detailed explanation
+
+## Simple approach
+
+As a first approximation, it could be assumed, that the smallest expected difference (B vs. C, 1 point) would drive the sample size. in that case the sample size could be determined as a simple calculation for the difference between 2 means using an approach based on a t-distribution. The results indicate that **100** patients **per arm** are recommended or **300** subjects total.
+
+```{r, echo=TRUE}
+  pwrss::pwrss.t.2means(
+  mu1=1,
+  mu2=0,
+  margin = 0,
+  sd1 = 2.5,
+  sd2 = 2.5,
+  welch.df = TRUE,
+  power = .8,
+  alternative = "greater",
+  alpha = 0.05/2,
+  verbose = TRUE
+)
+
+```
+
+
+```{r, fig.cap="Figure 1"}
+fig_1
+
+```
+
+## Effect of not evaluating the difference between the two distraction methods
+
+To note, if the primary endpoint would be stated as aiming to establish difference between arms A & B **and** A & C only (omitting the comparison between B & C for the primary endpoint), the required sample size would shrink considerably to **26** patients per arm or a total sample size of **78** for 80% Power.
+
+
+```{r, echo=TRUE}
+
+  pwrss::pwrss.t.2means(
+    mu1=3,
+    mu2=1,
+    margin = 0,
+    sd1 = 2.5,
+    sd2 = 2.5,
+    welch.df = TRUE,
+    power = .8,
+    alternative = "greater",
+    alpha = 0.05/2,
+    verbose = TRUE
   )
 
-tab %>%
-  as_hux_table()
+```
+
+## Effects of the scale
+
+The 0-10 point scale introduces a problem since if we suppose that the expected value of intervention C is 0 points, its variability would be 0 which is highly unlikely. A possible correction would be to recode all negative simulated values to 0. This would result in a smaller apparent variability in arm C, but it would still capture the essence of the problem. An example is shown below, where for 100 simulated values, the negative values of the original (red) distribution are recoded to 0 (blue; overlapping sections are purple). This approach was used in the simulations described later.
+
+
+
+```{r, fig.cap="Figure 2"}
+
+fig_2
 
 ```
 
- \
 
-Having a custom ref. docx file, I played around with the formatting and cooked up something passable. Its not modifiable however.
+## Simulation results (taking into consideration of the rounding effects)
 
- \
+### Interdependence of the expected values of the treatment arms
 
-```{r}
-#| df-print: kable
-#| tbl_colwidths: auto
+The simulation study was conducted varying all appropriate parameters to some degree. Evaluating three comparisons simultaneously is a complex task, as the expected values of the treatment arms are interdependent. The results of the simulation study from this perspective are shown in the figure below where 'bubbles' are colored according to how often they resulted in a successful study (out of 30 tries). The size of the bubble is proportional to the number of subjects in the study. The results indicate that if (at least) two treatment arms had a similar expected value, the chances for success went down considerably.  
 
-tab %>%
-    gtsummary::as_kable_extra(table.attr = 'data-quarto-disable-processing="true"',
-<<<<<<< Updated upstream
-          caption = "Example table") 
-=======
-          caption = "Example table")
->>>>>>> Stashed changes
+This highlights the importance of the supposed differences between the treatment arms.
 
+```{r, fig.cap="Figure 3"}
+
+fig_3
+
+```
+ 
+
+### Impact of variability
+
+The impact of the change in the variability of the results on the Power of the study is highlighted below. In case the sample size is chosen to be **>=137**, the study's power would be robust against the variability being >=3 points. 
+
+```{r, fig.cap="Figure 4"}
+
+
+fig_4
 
 ```
 
- \
 
-You *will* face an issue where a package outputs a "marvellously formatted" html table which would be horrible for your use case. That is a promise, but don't know how to handle it.
+### Impact of the expected values of the treatment arms
 
- \
+The impact of different expected treatment effects is shown below. The results highlight the impact of a higher-than-expected mean value in arm C being unfavorable, and the impact of a lower-than-expected mean value in arm B being unfavorable, and the impact if the mean value in arm B would be greater than expected (this being favorable). 
 
-```{r}
+```{r, fig.cap="Figure 5"}
 
-mod <- lm(petal_width ~ species_char + petal_length, data)
+fig_5
 
-sjPlot::tab_model(mod)
-
-
-```
-
- \
-
-Plots are nothing fancy.
-
- \
-
-```{r}
-
-ggstatsplot::ggbetweenstats(data, 
-                            species_char,
-                            petal_width,
-                            results.subtitle = FALSE) +
-  theme_bw()
-
-```
-
- \
-
-Text outputs; prints computationally intensive output loaded at the beginning.
-
- \
-
-```{r}
-
-cat(pi_estimate)
 
 ```
